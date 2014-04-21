@@ -95,7 +95,7 @@ class TestDiff(TestBase):
         # assert we could always find at least one instance of the members we 
         # can iterate in the diff index - if not this indicates its not working correctly
         # or our test does not span the whole range of possibilities
-        for key,value in assertion_map.items():
+        for key,value in list(assertion_map.items()):
             assert value, "Did not find diff for %s" % key
         # END for each iteration type 
         

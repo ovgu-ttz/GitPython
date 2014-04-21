@@ -10,7 +10,7 @@ from git import *
 from gitdb import IStream
 from gitdb.util import hex_to_bin
 
-from cStringIO import StringIO
+from io import StringIO
 import time
 import sys
 
@@ -61,7 +61,7 @@ def assert_commit_serialization(rwrepo, commit_id, print_performance_info=False)
     elapsed = time.time() - st
     
     if print_performance_info:
-        print >> sys.stderr, "Serialized %i and deserialized %i commits in %f s ( (%f, %f) commits / s" % (ns, nds, elapsed, ns/elapsed, nds/elapsed)
+        print("Serialized %i and deserialized %i commits in %f s ( (%f, %f) commits / s" % (ns, nds, elapsed, ns/elapsed, nds/elapsed), file=sys.stderr)
     # END handle performance info
     
 
@@ -97,7 +97,7 @@ class TestCommit(TestBase):
         check_entries(stats.total) 
         assert "files" in stats.total
         
-        for filepath, d in stats.files.items():
+        for filepath, d in list(stats.files.items()):
             check_entries(d)
         # END for each stated file
         
@@ -115,9 +115,9 @@ class TestCommit(TestBase):
         # assure we can parse unicode actors correctly
         name = "Üäöß ÄußÉ".decode("utf-8")
         assert len(name) == 9
-        special = Actor._from_string(u"%s <something@this.com>" % name)
+        special = Actor._from_string("%s <something@this.com>" % name)
         assert special.name == name
-        assert isinstance(special.name, unicode)
+        assert isinstance(special.name, str)
         
     def test_traversal(self):
         start = self.rorepo.commit("a4d06724202afccd2b5c54f81bcf2bf26dea7fff")
@@ -130,13 +130,13 @@ class TestCommit(TestBase):
         # basic branch first, depth first
         dfirst = start.traverse(branch_first=False)
         bfirst = start.traverse(branch_first=True)
-        assert dfirst.next() == p0
-        assert dfirst.next() == p00
+        assert next(dfirst) == p0
+        assert next(dfirst) == p00
         
-        assert bfirst.next() == p0
-        assert bfirst.next() == p1
-        assert bfirst.next() == p00
-        assert bfirst.next() == p10
+        assert next(bfirst) == p0
+        assert next(bfirst) == p1
+        assert next(bfirst) == p00
+        assert next(bfirst) == p10
         
         # at some point, both iterations should stop
         assert list(bfirst)[-1] == first
@@ -145,19 +145,19 @@ class TestCommit(TestBase):
         assert len(l[0]) == 2
         
         # ignore self
-        assert start.traverse(ignore_self=False).next() == start
+        assert next(start.traverse(ignore_self=False)) == start
         
         # depth 
         assert len(list(start.traverse(ignore_self=False, depth=0))) == 1
         
         # prune
-        assert start.traverse(branch_first=1, prune=lambda i,d: i==p0).next() == p1
+        assert next(start.traverse(branch_first=1, prune=lambda i,d: i==p0)) == p1
         
         # predicate
-        assert start.traverse(branch_first=1, predicate=lambda i,d: i==p1).next() == p1
+        assert next(start.traverse(branch_first=1, predicate=lambda i,d: i==p1)) == p1
         
         # traversal should stop when the beginning is reached
-        self.failUnlessRaises(StopIteration, first.traverse().next)
+        self.failUnlessRaises(StopIteration, first.traverse().__next__)
         
         # parents of the first commit should be empty ( as the only parent has a null 
         # sha )
@@ -230,14 +230,14 @@ class TestCommit(TestBase):
         c = self.rorepo.commit('0.1.5')
         for skip in (0, 1):
             piter = c.iter_parents(skip=skip)
-            first_parent = piter.next()
+            first_parent = next(piter)
             assert first_parent != c
             assert first_parent == c.parents[0]
         # END for each 
         
     def test_base(self):
         name_rev = self.rorepo.head.commit.name_rev
-        assert isinstance(name_rev, basestring)
+        assert isinstance(name_rev, str)
         
     @with_rw_repo('HEAD', bare=True)
     def test_serialization(self, rwrepo):
@@ -250,8 +250,8 @@ class TestCommit(TestBase):
         # create a commit with unicode in the message, and the author's name
         # Verify its serialization and deserialization
         cmt = self.rorepo.commit('0.1.6')
-        assert isinstance(cmt.message, unicode)     # it automatically decodes it as such
-        assert isinstance(cmt.author.name, unicode) # same here
+        assert isinstance(cmt.message, str)     # it automatically decodes it as such
+        assert isinstance(cmt.author.name, str) # same here
         
         cmt.message = "üäêèß".decode("utf-8")
         assert len(cmt.message) == 5

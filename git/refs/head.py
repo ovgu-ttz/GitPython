@@ -1,5 +1,5 @@
-from symbolic import SymbolicReference
-from reference import Reference
+from .symbolic import SymbolicReference
+from .reference import Reference
 
 from git.config import SectionConstraint
 
@@ -81,7 +81,7 @@ class HEAD(SymbolicReference):
         
         try:
             self.repo.git.reset(mode, commit, add_arg, paths, **kwargs)
-        except GitCommandError, e:
+        except GitCommandError as e:
             # git nowadays may use 1 as status to indicate there are still unstaged
             # modifications after the reset
             if e.status != 1:

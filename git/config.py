@@ -8,9 +8,9 @@ configuration files"""
 
 import re
 import os
-import ConfigParser as cp
+import configparser as cp
 import inspect
-import cStringIO
+import io
 
 from git.odict import OrderedDict
 from git.util import LockFile
@@ -97,7 +97,7 @@ class SectionConstraint(object):
         return self._config
         
 
-class GitConfigParser(cp.RawConfigParser, object):
+class GitConfigParser(cp.RawConfigParser, object, metaclass=MetaParserBuilder):
     """Implements specifics required to read git style configuration files.
     
     This variation behaves much like the git.config command such that the configuration
@@ -112,7 +112,6 @@ class GitConfigParser(cp.RawConfigParser, object):
     :note:
         The config is case-sensitive even when queried, hence section and option names
         must match perfectly."""
-    __metaclass__ = MetaParserBuilder
     
     
     #{ Configuration
@@ -163,7 +162,7 @@ class GitConfigParser(cp.RawConfigParser, object):
                 raise ValueError("Write-ConfigParsers can operate on a single file only, multiple files have been passed")
             # END single file check
             
-            if not isinstance(file_or_files, basestring):
+            if not isinstance(file_or_files, str):
                 file_or_files = file_or_files.name
             # END get filename from handle/stream
             # initialize lock base - we want to write
@@ -183,8 +182,8 @@ class GitConfigParser(cp.RawConfigParser, object):
         try:
             try:
                 self.write()
-            except IOError,e:
-                print "Exception during destruction of GitConfigParser: %s" % str(e)
+            except IOError as e:
+                print("Exception during destruction of GitConfigParser: %s" % str(e))
         finally:
             self._lock._release_lock()
     
@@ -283,7 +282,7 @@ class GitConfigParser(cp.RawConfigParser, object):
                 try:
                     fp = open(file_object)
                     close_fp = True
-                except IOError,e:
+                except IOError as e:
                     continue
             # END fp handling
                 
@@ -301,7 +300,7 @@ class GitConfigParser(cp.RawConfigParser, object):
         git compatible format"""
         def write_section(name, section_dict):
             fp.write("[%s]\n" % name)
-            for (key, value) in section_dict.items():
+            for (key, value) in list(section_dict.items()):
                 if key != "__name__":
                     fp.write("\t%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
                 # END if key is not __name__
@@ -309,7 +308,7 @@ class GitConfigParser(cp.RawConfigParser, object):
         
         if self._defaults:
             write_section(cp.DEFAULTSECT, self._defaults)
-        map(lambda t: write_section(t[0],t[1]), self._sections.items())
+        list(map(lambda t: write_section(t[0],t[1]), list(self._sections.items())))
 
         
     @needs_values
@@ -324,7 +323,7 @@ class GitConfigParser(cp.RawConfigParser, object):
         close_fp = False
         
         # we have a physical file on disk, so get a lock
-        if isinstance(fp, (basestring, file)):
+        if isinstance(fp, (str, file)):
             self._lock._obtain_lock()
         # END get lock for physical files
         
@@ -382,7 +381,7 @@ class GitConfigParser(cp.RawConfigParser, object):
                 return default
             raise
         
-        types = ( long, float )
+        types = ( int, float )
         for numtype in types:
             try:
                 val = numtype( valuestr )
@@ -403,7 +402,7 @@ class GitConfigParser(cp.RawConfigParser, object):
         if vl == 'true':
             return True
         
-        if not isinstance( valuestr, basestring ):
+        if not isinstance( valuestr, str ):
             raise TypeError( "Invalid value type: only int, long, float and str are allowed", valuestr )
         
         return valuestr

@@ -10,15 +10,15 @@ from git.util import        (
                             Stats,
                         )
 from git.diff import Diffable
-from tree import Tree
+from .tree import Tree
 from gitdb import IStream
-from cStringIO import StringIO
+from io import StringIO
 
-import base
+from . import base
 from gitdb.util import (
                         hex_to_bin
                         )
-from util import (
+from .util import (
                         Traversable,
                         Serializable,
                         parse_date,
@@ -372,7 +372,7 @@ class Commit(base.Object, Iterable, Diffable, Traversable, Serializable):
             
         a = self.author
         aname = a.name
-        if isinstance(aname, unicode):
+        if isinstance(aname, str):
             aname = aname.encode(self.encoding)
         # END handle unicode in name
         
@@ -384,7 +384,7 @@ class Commit(base.Object, Iterable, Diffable, Traversable, Serializable):
             
         # encode committer
         aname = c.name
-        if isinstance(aname, unicode):
+        if isinstance(aname, str):
             aname = aname.encode(self.encoding)
         # END handle unicode in name
         write(fmt % ("committer", aname, c.email, 
@@ -397,7 +397,7 @@ class Commit(base.Object, Iterable, Diffable, Traversable, Serializable):
         write("\n")
         
         # write plain bytes, be sure its encoded according to our encoding
-        if isinstance(self.message, unicode):
+        if isinstance(self.message, str):
             write(self.message.encode(self.encoding))
         else:
             write(self.message)
@@ -442,14 +442,14 @@ class Commit(base.Object, Iterable, Diffable, Traversable, Serializable):
         try:
             self.author.name = self.author.name.decode(self.encoding) 
         except UnicodeDecodeError:
-            print >> sys.stderr, "Failed to decode author name '%s' using encoding %s" % (self.author.name, self.encoding)
+            print("Failed to decode author name '%s' using encoding %s" % (self.author.name, self.encoding), file=sys.stderr)
         # END handle author's encoding
         
         # decode committer name
         try:
             self.committer.name = self.committer.name.decode(self.encoding) 
         except UnicodeDecodeError:
-            print >> sys.stderr, "Failed to decode committer name '%s' using encoding %s" % (self.committer.name, self.encoding)
+            print("Failed to decode committer name '%s' using encoding %s" % (self.committer.name, self.encoding), file=sys.stderr)
         # END handle author's encoding
         
         # a stream from our data simply gives us the plain message
@@ -458,7 +458,7 @@ class Commit(base.Object, Iterable, Diffable, Traversable, Serializable):
         try:
             self.message = self.message.decode(self.encoding)
         except UnicodeDecodeError:
-            print >> sys.stderr, "Failed to decode message '%s' using encoding %s" % (self.message, self.encoding)
+            print("Failed to decode message '%s' using encoding %s" % (self.message, self.encoding), file=sys.stderr)
         # END exception handling 
         return self
         

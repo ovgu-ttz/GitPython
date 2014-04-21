@@ -62,7 +62,7 @@ class TestRemoteProgress(RemoteProgress):
         assert self._stages_per_op
         
         # must have seen all stages
-        for op, stages in self._stages_per_op.items():
+        for op, stages in list(self._stages_per_op.items()):
             assert stages & self.STAGE_MASK == self.STAGE_MASK
         # END for each op/stage
 
@@ -81,7 +81,7 @@ class TestRemote(TestBase):
         # self._print_fetchhead(remote.repo)
         assert len(results) > 0 and isinstance(results[0], FetchInfo)
         for info in results:
-            assert isinstance(info.note, basestring)
+            assert isinstance(info.note, str)
             if isinstance(info.ref, Reference):
                 assert info.flags != 0
             # END reference type flags handling 
@@ -97,7 +97,7 @@ class TestRemote(TestBase):
         assert len(results) > 0 and isinstance(results[0], PushInfo)
         for info in results:
             assert info.flags
-            assert isinstance(info.summary, basestring)
+            assert isinstance(info.summary, str)
             if info.old_commit is not None:
                 assert isinstance(info.old_commit, Commit)
             if info.flags & info.ERROR:

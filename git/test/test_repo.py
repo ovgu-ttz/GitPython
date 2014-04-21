@@ -20,7 +20,7 @@ from gitdb.util import hex_to_bin, bin_to_hex
 import os, sys
 import tempfile
 import shutil
-from cStringIO import StringIO
+from io import StringIO
 
 
 class TestRepo(TestBase):
@@ -274,7 +274,7 @@ class TestRepo(TestBase):
         # test the 'lines per commit' entries
         tlist = b[0][1]
         assert_true( tlist )
-        assert_true( isinstance( tlist[0], basestring ) )
+        assert_true( isinstance( tlist[0], str ) )
         assert_true( len( tlist ) < sum( len(t) for t in tlist ) )               # test for single-char bug
         
     def test_blame_real(self):
@@ -505,7 +505,7 @@ class TestRepo(TestBase):
                     assert obj.type == ref.object.type
                     num_resolved += 1
                 except BadObject:
-                    print "failed on %s" % path_section
+                    print("failed on %s" % path_section)
                     # is fine, in case we have something like 112, which belongs to remotes/rname/merge-requests/112
                     pass
                 # END exception handling

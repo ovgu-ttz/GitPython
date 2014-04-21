@@ -5,11 +5,11 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 import os, sys
-from util import (
+from .util import (
                     LazyMixin, 
                     stream_copy
                 )
-from exc import GitCommandError
+from .exc import GitCommandError
 
 from subprocess import (
                             call, 
@@ -192,7 +192,7 @@ class Git(LazyMixin):
         def __iter__(self):
             return self
             
-        def next(self):
+        def __next__(self):
             line = self.readline()
             if not line:
                 raise StopIteration
@@ -321,7 +321,7 @@ class Git(LazyMixin):
            If you add additional keyword arguments to the signature of this method, 
            you must update the execute_kwargs tuple housed in this module."""
         if self.GIT_PYTHON_TRACE and not self.GIT_PYTHON_TRACE == 'full':
-            print ' '.join(command)
+            print(' '.join(command))
 
         # Allow the user to have the command executed in their working dir.
         if with_keep_cwd or self._working_dir is None:
@@ -370,11 +370,11 @@ class Git(LazyMixin):
         if self.GIT_PYTHON_TRACE == 'full':
             cmdstr = " ".join(command)
             if stderr_value:
-                print "%s -> %d; stdout: '%s'; stderr: '%s'" % (cmdstr, status, stdout_value, stderr_value)
+                print("%s -> %d; stdout: '%s'; stderr: '%s'" % (cmdstr, status, stdout_value, stderr_value))
             elif stdout_value:
-                print "%s -> %d; stdout: '%s'" % (cmdstr, status, stdout_value)
+                print("%s -> %d; stdout: '%s'" % (cmdstr, status, stdout_value))
             else:
-                print "%s -> %d" % (cmdstr, status)
+                print("%s -> %d" % (cmdstr, status))
         # END handle debug printing
 
         if with_exceptions and status != 0:
@@ -389,7 +389,7 @@ class Git(LazyMixin):
     def transform_kwargs(self, **kwargs):
         """Transforms Python style kwargs into git command line options."""
         args = list()
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             if len(k) == 1:
                 if v is True:
                     args.append("-%s" % k)

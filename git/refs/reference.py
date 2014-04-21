@@ -1,4 +1,4 @@
-from symbolic import SymbolicReference
+from .symbolic import SymbolicReference
 import os
 from git.objects import Object
 from git.util import (

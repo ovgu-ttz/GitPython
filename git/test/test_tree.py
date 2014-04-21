@@ -11,7 +11,7 @@ from git.objects.fun import (
                                 traverse_tree_recursive,
                                 traverse_trees_recursive
                             )
-from cStringIO import StringIO
+from io import StringIO
 
 class TestTree(TestBase):
     

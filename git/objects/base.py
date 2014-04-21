@@ -4,7 +4,7 @@
 # This module is part of GitPython and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 from git.util import LazyMixin, join_path_native, stream_copy
-from util import get_object_type_by_name
+from .util import get_object_type_by_name
 from gitdb.util import (
                             hex_to_bin,
                             bin_to_hex,

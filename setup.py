@@ -44,7 +44,7 @@ def _stamp_version(filename):
     try:
         f = open(filename, 'r')
     except (IOError, OSError):
-        print >> sys.stderr, "Couldn't find file %s to stamp version" % filename
+        print("Couldn't find file %s to stamp version" % filename, file=sys.stderr)
         return
     #END handle error, usually happens during binary builds
     for line in f:
@@ -59,7 +59,7 @@ def _stamp_version(filename):
         f.writelines(out)
         f.close()
     else:
-        print >> sys.stderr, "WARNING: Couldn't find version line in file %s" % filename
+        print("WARNING: Couldn't find version line in file %s" % filename, file=sys.stderr)
 
 setup(name = "GitPython",
       cmdclass={'build_py': build_py, 'sdist': sdist},

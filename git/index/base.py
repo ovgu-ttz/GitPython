@@ -8,16 +8,16 @@ import os
 import sys
 import subprocess
 import glob
-from cStringIO import StringIO
+from io import StringIO
 
 from stat import S_ISLNK
 
-from typ import (
+from .typ import (
                     BaseIndexEntry, 
                     IndexEntry, 
                 )
 
-from util import (
+from .util import (
                     TemporaryFileSwap,
                     post_clear_cache, 
                     default_index,
@@ -52,7 +52,7 @@ from git.util import (
                             to_native_path
                         )
 
-from fun import (
+from .fun import (
                     entry_key,
                     write_cache,
                     read_cache,
@@ -65,7 +65,7 @@ from fun import (
 from gitdb.base import IStream
 from gitdb.db import MemoryDB
 from gitdb.util import to_bin_sha
-from itertools import izip
+
 
 __all__ = ( 'IndexFile', 'CheckoutError' )
 
@@ -163,7 +163,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
         
     def _entries_sorted(self):
         """:return: list of entries, in a sorted fashion, first by path, then by stage"""
-        entries_sorted = self.entries.values()
+        entries_sorted = list(self.entries.values())
         entries_sorted.sort(key=lambda e: (e.path, e.stage))        # use path/stage as sort key
         return entries_sorted
         
@@ -267,7 +267,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
         
         inst = cls(repo)
         # convert to entries dict
-        entries = dict(izip(((e.path, e.stage) for e in base_entries), 
+        entries = dict(zip(((e.path, e.stage) for e in base_entries), 
                             (IndexEntry.from_base(e) for e in base_entries)))
         
         inst.entries = entries
@@ -418,7 +418,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
             Function(t) returning True if tuple(stage, Blob) should be yielded by the
             iterator. A default filter, the BlobFilter, allows you to yield blobs
             only if they match a given list of paths. """
-        for entry in self.entries.itervalues():
+        for entry in self.entries.values():
             # TODO: is it necessary to convert the mode ? We did that when adding 
             # it to the index, right ?
             mode = stat_mode_to_index_mode(entry.mode)
@@ -446,7 +446,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
         for stage, blob in self.iter_blobs(is_unmerged_blob):
             path_map.setdefault(blob.path, list()).append((stage, blob))
         # END for each unmerged blob
-        for l in path_map.itervalues():
+        for l in path_map.values():
             l.sort()
         return path_map
 
@@ -550,7 +550,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
         entries = list()
 
         for item in items:
-            if isinstance(item, basestring):
+            if isinstance(item, str):
                 paths.append(self._to_relative_path(item))
             elif isinstance(item, (Blob, Submodule)):
                 entries.append(BaseIndexEntry.from_blob(item))
@@ -750,7 +750,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
         for item in items:
             if isinstance(item, (BaseIndexEntry,(Blob, Submodule))):
                 paths.append(self._to_relative_path(item.path))
-            elif isinstance(item, basestring):
+            elif isinstance(item, str):
                 paths.append(self._to_relative_path(item))
             else:
                 raise TypeError("Invalid item type: %r" % item)
@@ -852,7 +852,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
 
         # parse result - first 0:n/2 lines are 'checking ', the remaining ones
         # are the 'renaming' ones which we parse
-        for ln in xrange(len(mvlines)/2, len(mvlines)):
+        for ln in range(len(mvlines)/2, len(mvlines)):
             tokens = mvlines[ln].split(' to ')
             assert len(tokens) == 2, "Too many tokens in %s" % mvlines[ln]
 
@@ -997,11 +997,11 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
             proc = self.repo.git.checkout_index(*args, **kwargs)
             proc.wait()
             fprogress(None, True, None)
-            rval_iter = ( e.path for e in self.entries.itervalues() )
+            rval_iter = ( e.path for e in self.entries.values() )
             handle_stderr(proc, rval_iter)
             return rval_iter
         else:
-            if isinstance(paths, basestring):
+            if isinstance(paths, str):
                 paths = [paths]
 
             # make sure we have our entries loaded before we start checkout_index
@@ -1027,7 +1027,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
                     dir = co_path
                     if not dir.endswith('/'):
                         dir += '/'
-                    for entry in self.entries.itervalues():
+                    for entry in self.entries.values():
                         if entry.path.startswith(dir):
                             p = entry.path
                             self._write_path_to_stdin(proc, p, p, make_exc, 
@@ -1137,7 +1137,7 @@ class IndexFile(LazyMixin, diff.Diffable, Serializable):
         # index against anything but None is a reverse diff with the respective
         # item. Handle existing -R flags properly. Transform strings to the object
         # so that we can call diff on it
-        if isinstance(other, basestring):
+        if isinstance(other, str):
             other = self.repo.rev_parse(other)
         # END object conversion
 

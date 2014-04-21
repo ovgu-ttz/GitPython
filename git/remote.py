@@ -6,9 +6,9 @@
 
 # Module implementing a remote object allowing easy access to git remotes
 
-from exc import GitCommandError
-from ConfigParser import NoOptionError
-from config import SectionConstraint
+from .exc import GitCommandError
+from configparser import NoOptionError
+from .config import SectionConstraint
 
 from git.util import (
                         LazyMixin,
@@ -17,7 +17,7 @@ from git.util import (
                         RemoteProgress
                         )
 
-from refs import (
+from .refs import (
                     Reference,
                     RemoteReference,
                     SymbolicReference, 
@@ -62,7 +62,7 @@ def finalize_process(proc):
     """Wait for the process (clone, fetch, pull or push) and handle its errors accordingly"""
     try:
         proc.wait()
-    except GitCommandError,e:
+    except GitCommandError as e:
         # if a push has rejected items, the command has non-zero return status
         # a return status of 128 indicates a connection error - reraise the previous one
         if proc.poll() == 128:
@@ -523,7 +523,7 @@ class Remote(LazyMixin, Iterable):
             if line.startswith('From') or line.startswith('remote: Total') or line.startswith('POST'):
                 continue
             elif line.startswith('warning:'):
-                print >> sys.stderr, line
+                print(line, file=sys.stderr)
                 continue
             elif line.startswith('fatal:'):
                 raise GitCommandError(("Error when fetching: %s" % line,), 2)

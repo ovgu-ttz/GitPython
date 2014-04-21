@@ -170,7 +170,7 @@ class RefLog(list, Serializable):
         :param stream: file-like object containing the revlog in its native format
             or basestring instance pointing to a file to read"""
         new_entry = RefLogEntry.from_line
-        if isinstance(stream, basestring):
+        if isinstance(stream, str):
             stream = file_contents_ro_filepath(stream)
         #END handle stream type
         while True:
@@ -198,7 +198,7 @@ class RefLog(list, Serializable):
             return RefLogEntry.from_line(fp.readlines()[index].strip())
         else:
             # read until index is reached
-            for i in xrange(index+1):
+            for i in range(index+1):
                 line = fp.readline()
                 if not line:
                     break

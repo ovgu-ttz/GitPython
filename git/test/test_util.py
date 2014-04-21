@@ -91,7 +91,7 @@ class TestUtils(TestBase):
             
             # now that we are here, test our conversion functions as well
             utctz = altz_to_utctz_str(offset)
-            assert isinstance(utctz, basestring)
+            assert isinstance(utctz, str)
             assert utctz_to_altz(verify_utctz(utctz)) == offset
         # END assert rval utility
         

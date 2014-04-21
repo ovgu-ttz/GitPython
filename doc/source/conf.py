@@ -21,7 +21,7 @@ import sys, os
 # absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
-print sys.path
+print(sys.path)
 
 # General configuration
 # ---------------------
@@ -43,8 +43,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'GitPython'
-copyright = u'Copyright (C) 2008, 2009 Michael Trier and contributors, 2010 Sebastian Thiel'
+project = 'GitPython'
+copyright = 'Copyright (C) 2008, 2009 Michael Trier and contributors, 2010 Sebastian Thiel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -175,8 +175,8 @@ htmlhelp_basename = 'gitpythondoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'GitPython.tex', ur'GitPython Documentation',
-   ur'Michael Trier', 'manual'),
+  ('index', 'GitPython.tex', r'GitPython Documentation',
+   r'Michael Trier', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

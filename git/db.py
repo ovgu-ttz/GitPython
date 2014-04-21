@@ -1,5 +1,5 @@
 """Module with our own gitdb implementation - it uses the git command"""
-from exc import (
+from .exc import (
                     GitCommandError, 
                     BadObject
                 )

@@ -28,7 +28,7 @@ class TestRootProgress(RootUpdateProgress):
     """Just prints messages, for now without checking the correctness of the states"""
     
     def update(self, op, index, max_count, message=''):
-        print message
+        print(message)
         
 prog = TestRootProgress()
 
@@ -69,10 +69,10 @@ class TestSubmodule(TestBase):
         self.failUnlessRaises(InvalidGitRepositoryError, getattr, sm, 'branch')
         
         # branch_path works, as its just a string
-        assert isinstance(sm.branch_path, basestring)
+        assert isinstance(sm.branch_path, str)
         
         # some commits earlier we still have a submodule, but its at a different commit
-        smold = Submodule.iter_items(rwrepo, self.k_subm_changed).next()
+        smold = next(Submodule.iter_items(rwrepo, self.k_subm_changed))
         assert smold.binsha != sm.binsha
         assert smold != sm                  # the name changed
         

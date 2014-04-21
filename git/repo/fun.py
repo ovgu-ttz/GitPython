@@ -247,7 +247,7 @@ def rev_parse(repo, rev):
         try:
             if token == "~":
                 obj = to_commit(obj)
-                for item in xrange(num):
+                for item in range(num):
                     obj = obj.parents[0]
                 # END for each history item to walk
             elif token == "^":

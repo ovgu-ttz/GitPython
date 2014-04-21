@@ -6,15 +6,15 @@
 
 from git.test.lib import *
 from git import *
-import StringIO
+import io
 from copy import copy
-from ConfigParser import NoSectionError
+from configparser import NoSectionError
 
 class TestBase(TestCase):
     
     def _to_memcache(self, file_path):
         fp = open(file_path, "r")
-        sio = StringIO.StringIO(fp.read())
+        sio = io.StringIO(fp.read())
         sio.name = file_path
         return sio
         
@@ -80,7 +80,7 @@ class TestBase(TestCase):
                 num_options += 1
                 val = r_config.get(section, option)
                 val_typed = r_config.get_value(section, option)
-                assert isinstance(val_typed, (bool, long, float, basestring))
+                assert isinstance(val_typed, (bool, int, float, str))
                 assert val
                 assert "\n" not in option
                 assert "\n" not in val

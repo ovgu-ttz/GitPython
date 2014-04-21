@@ -483,7 +483,7 @@ class LockFile(object):
         try:
             fd = os.open(lock_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0)
             os.close(fd)
-        except OSError,e:
+        except OSError as e:
             raise IOError(str(e))
         
         self._owns_lock = True
@@ -505,7 +505,7 @@ class LockFile(object):
             # on bloody windows, the file needs write permissions to be removable.
             # Why ... 
             if os.name == 'nt':
-                os.chmod(lfp, 0777)
+                os.chmod(lfp, 0o777)
             # END handle win32
             os.remove(lfp)
         except OSError:
@@ -521,7 +521,7 @@ class BlockingLockFile(LockFile):
         be raised during the blocking period, preventing hangs as the lock 
         can never be obtained."""
     __slots__ = ("_check_interval", "_max_block_time")
-    def __init__(self, file_path, check_interval_s=0.3, max_block_time_s=sys.maxint):
+    def __init__(self, file_path, check_interval_s=0.3, max_block_time_s=sys.maxsize):
         """Configure the instance
         
         :parm check_interval_s:
@@ -584,7 +584,7 @@ class IterableList(list):
     def __init__(self, id_attr, prefix=''):
         self._id_attr = id_attr
         self._prefix = prefix
-        if not isinstance(id_attr, basestring):
+        if not isinstance(id_attr, str):
             raise ValueError("First parameter must be a string identifying the name-property. Extend the list after initialization")
         # END help debugging !
         

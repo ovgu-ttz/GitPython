@@ -1,6 +1,6 @@
 """Module with additional types used by the index"""
 
-from util import (
+from .util import (
                     pack, 
                     unpack
                 )

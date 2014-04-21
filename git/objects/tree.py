@@ -3,14 +3,14 @@
 #
 # This module is part of GitPython and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
-import util
-from base import IndexObject
+from . import util
+from .base import IndexObject
 from git.util import join_path
-from blob import Blob
-from submodule.base import Submodule
+from .blob import Blob
+from .submodule.base import Submodule
 import git.diff as diff
 
-from fun import (
+from .fun import (
                     tree_entries_from_data, 
                     tree_to_stream
                  )
@@ -116,10 +116,10 @@ class Tree(IndexObject, diff.Diffable, util.Traversable, util.Serializable):
     __slots__ = "_cache"
     
     # actual integer ids for comparison 
-    commit_id = 016     # equals stat.S_IFDIR | stat.S_IFLNK - a directory link
-    blob_id = 010
-    symlink_id = 012
-    tree_id = 004
+    commit_id = 0o16     # equals stat.S_IFDIR | stat.S_IFLNK - a directory link
+    blob_id = 0o10
+    symlink_id = 0o12
+    tree_id = 0o04
     
     _map_id_to_type = {
                         commit_id : Submodule, 
@@ -232,7 +232,7 @@ class Tree(IndexObject, diff.Diffable, util.Traversable, util.Serializable):
             info = self._cache[item]
             return self._map_id_to_type[info[1] >> 12](self.repo, info[0], info[1], join_path(self.path, info[2]))
         
-        if isinstance(item, basestring):
+        if isinstance(item, str):
             # compatability
             return self.__div__(item)
         # END index is basestring 

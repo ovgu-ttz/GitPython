@@ -36,26 +36,26 @@ class TestUtilPerformance(TestBigRepoR):
         for cls in (Slotty, Dicty, BigSlotty, BigDicty):
             cli = cls()
             st = time()
-            for i in xrange(ni):
+            for i in range(ni):
                 cli.attr
             # END for each access
             elapsed = time() - st
-            print >> sys.stderr, "Accessed %s.attr %i times in %s s ( %f acc / s)" % (cls.__name__, ni, elapsed, ni / elapsed)
+            print("Accessed %s.attr %i times in %s s ( %f acc / s)" % (cls.__name__, ni, elapsed, ni / elapsed), file=sys.stderr)
         # END for each class type
         
         # check num of sequence-acceses
         for cls in (list, tuple):
             x = 10
             st = time()
-            s = cls(range(x))
-            for i in xrange(ni):
+            s = cls(list(range(x)))
+            for i in range(ni):
                 s[0]
                 s[1]
                 s[2]
             # END for
             elapsed = time() - st
             na = ni * 3
-            print >> sys.stderr, "Accessed %s[x] %i times in %s s ( %f acc / s)" % (cls.__name__, na, elapsed, na / elapsed)
+            print("Accessed %s[x] %i times in %s s ( %f acc / s)" % (cls.__name__, na, elapsed, na / elapsed), file=sys.stderr)
         # END for each sequence 
         
     def test_instantiation(self):
@@ -64,7 +64,7 @@ class TestUtilPerformance(TestBigRepoR):
         for mni in range(max_num_items+1):
             for cls in (tuple, list):
                 st = time()
-                for i in xrange(ni):
+                for i in range(ni):
                     if mni == 0:
                         cls()
                     elif mni == 1:
@@ -76,28 +76,28 @@ class TestUtilPerformance(TestBigRepoR):
                     elif mni == 4:
                         cls((1,2,3,4))
                     else:
-                        cls(x for x in xrange(mni))
+                        cls(x for x in range(mni))
                     # END handle empty cls
                 # END for each item
                 elapsed = time() - st
-                print >> sys.stderr, "Created %i %ss of size %i in %f s ( %f inst / s)" % (ni, cls.__name__, mni, elapsed, ni / elapsed)
+                print("Created %i %ss of size %i in %f s ( %f inst / s)" % (ni, cls.__name__, mni, elapsed, ni / elapsed), file=sys.stderr)
             # END for each type
         # END for each item count
         
         # tuple and tuple direct
         st = time()
-        for i in xrange(ni):
+        for i in range(ni):
             t = (1,2,3,4)
         # END for each item
         elapsed = time() - st
-        print >> sys.stderr, "Created %i tuples (1,2,3,4) in %f s ( %f tuples / s)" % (ni, elapsed, ni / elapsed)
+        print("Created %i tuples (1,2,3,4) in %f s ( %f tuples / s)" % (ni, elapsed, ni / elapsed), file=sys.stderr)
         
         st = time()
-        for i in xrange(ni):
+        for i in range(ni):
             t = tuple((1,2,3,4))
         # END for each item
         elapsed = time() - st
-        print >> sys.stderr, "Created %i tuples tuple((1,2,3,4)) in %f s ( %f tuples / s)" % (ni, elapsed, ni / elapsed)
+        print("Created %i tuples tuple((1,2,3,4)) in %f s ( %f tuples / s)" % (ni, elapsed, ni / elapsed), file=sys.stderr)
         
     def test_unpacking_vs_indexing(self):
         ni = 1000000
@@ -106,49 +106,49 @@ class TestUtilPerformance(TestBigRepoR):
         
         for sequence in (list_items, tuple_items):
             st = time()
-            for i in xrange(ni):
+            for i in range(ni):
                 one, two, three, four = sequence
             # END for eac iteration
             elapsed = time() - st
-            print >> sys.stderr, "Unpacked %i %ss of size %i in %f s ( %f acc / s)" % (ni, type(sequence).__name__, len(sequence), elapsed, ni / elapsed)
+            print("Unpacked %i %ss of size %i in %f s ( %f acc / s)" % (ni, type(sequence).__name__, len(sequence), elapsed, ni / elapsed), file=sys.stderr)
             
             st = time()
-            for i in xrange(ni):
+            for i in range(ni):
                 one, two, three, four = sequence[0], sequence[1], sequence[2], sequence[3]
             # END for eac iteration
             elapsed = time() - st
-            print >> sys.stderr, "Unpacked %i %ss of size %i individually in %f s ( %f acc / s)" % (ni, type(sequence).__name__, len(sequence), elapsed, ni / elapsed)
+            print("Unpacked %i %ss of size %i individually in %f s ( %f acc / s)" % (ni, type(sequence).__name__, len(sequence), elapsed, ni / elapsed), file=sys.stderr)
             
             st = time()
-            for i in xrange(ni):
+            for i in range(ni):
                 one, two = sequence[0], sequence[1]
             # END for eac iteration
             elapsed = time() - st
-            print >> sys.stderr, "Unpacked %i %ss of size %i individually (2 of 4) in %f s ( %f acc / s)" % (ni, type(sequence).__name__, len(sequence), elapsed, ni / elapsed)
+            print("Unpacked %i %ss of size %i individually (2 of 4) in %f s ( %f acc / s)" % (ni, type(sequence).__name__, len(sequence), elapsed, ni / elapsed), file=sys.stderr)
         # END for each sequence
         
     def test_large_list_vs_iteration(self):
         # what costs more: alloc/realloc of lists, or the cpu strain of iterators ?
         def slow_iter(ni):
-            for i in xrange(ni):
+            for i in range(ni):
                 yield i
         # END slow iter - be closer to the real world
         
         # alloc doesn't play a role here it seems 
         for ni in (500, 1000, 10000, 20000, 40000):
             st = time()
-            for i in list(xrange(ni)):
+            for i in list(range(ni)):
                 i
             # END for each item
             elapsed = time() - st
-            print >> sys.stderr, "Iterated %i items from list in %f s ( %f acc / s)" % (ni, elapsed, ni / elapsed)
+            print("Iterated %i items from list in %f s ( %f acc / s)" % (ni, elapsed, ni / elapsed), file=sys.stderr)
             
             st = time()
             for i in slow_iter(ni):
                 i
             # END for each item
             elapsed = time() - st
-            print >> sys.stderr, "Iterated %i items from iterator in %f s ( %f acc / s)" % (ni, elapsed, ni / elapsed)
+            print("Iterated %i items from iterator in %f s ( %f acc / s)" % (ni, elapsed, ni / elapsed), file=sys.stderr)
         # END for each number of iterations
         
     def test_type_vs_inst_class(self):
@@ -160,15 +160,15 @@ class TestUtilPerformance(TestBigRepoR):
         
         ni = 1000000
         st = time()
-        for i in xrange(ni):
+        for i in range(ni):
             inst.__class__()
         # END for each item
         elapsed = time() - st
-        print >> sys.stderr, "Created %i items using inst.__class__ in %f s ( %f items / s)" % (ni, elapsed, ni / elapsed)
+        print("Created %i items using inst.__class__ in %f s ( %f items / s)" % (ni, elapsed, ni / elapsed), file=sys.stderr)
         
         st = time()
-        for i in xrange(ni):
+        for i in range(ni):
             type(inst)()
         # END for each item
         elapsed = time() - st
-        print >> sys.stderr, "Created %i items using type(inst)() in %f s ( %f items / s)" % (ni, elapsed, ni / elapsed)
+        print("Created %i items using type(inst)() in %f s ( %f items / s)" % (ni, elapsed, ni / elapsed), file=sys.stderr)

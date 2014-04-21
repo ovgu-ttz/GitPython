@@ -16,7 +16,7 @@ def tree_to_stream(entries, write):
     
     for binsha, mode, name in entries:
         mode_str = ''
-        for i in xrange(6):
+        for i in range(6):
             mode_str = chr(((mode >> (i*3)) & bit_mask) + ord_zero) + mode_str
         # END for each 8 octal value
         
@@ -30,7 +30,7 @@ def tree_to_stream(entries, write):
         # hence we must convert to an utf8 string for it to work properly.
         # According to my tests, this is exactly what git does, that is it just
         # takes the input literally, which appears to be utf8 on linux.
-        if isinstance(name, unicode):
+        if isinstance(name, str):
             name = name.encode("utf8")
         write("%s %s\0%s" % (mode_str, name, binsha)) 
     # END for each item

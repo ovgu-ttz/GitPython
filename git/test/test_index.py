@@ -22,7 +22,7 @@ class TestIndex(TestBase):
     
     def _assert_fprogress(self, entries):
         assert len(entries) == len(self._fprogress_map)
-        for path, call_count in self._fprogress_map.iteritems():
+        for path, call_count in self._fprogress_map.items():
             assert call_count == 2
         # END for each item in progress map
         self._reset_progress()
@@ -61,7 +61,7 @@ class TestIndex(TestBase):
         
         # test entry
         last_val = None
-        entry = index.entries.itervalues().next()
+        entry = next(iter(index.entries.values()))
         for attr in ("path","ctime","mtime","dev","inode","mode","uid",
                                 "gid","size","binsha", "hexsha", "stage"):
             val = getattr(entry, attr)
@@ -75,7 +75,7 @@ class TestIndex(TestBase):
         # test stage
         index_merge = IndexFile(self.rorepo, fixture_path("index_merge"))
         assert len(index_merge.entries) == 106
-        assert len(list(e for e in index_merge.entries.itervalues() if e.stage != 0 ))
+        assert len(list(e for e in index_merge.entries.values() if e.stage != 0 ))
         
         # write the data - it must match the original
         tmpfile = tempfile.mktemp()
@@ -97,7 +97,7 @@ class TestIndex(TestBase):
             blist.append(blob)
         # END for each blob in tree
         if len(blist) != len(index.entries):
-            iset = set(k[0] for k in index.entries.keys())
+            iset = set(k[0] for k in list(index.entries.keys()))
             bset = set(b.path for b in blist)
             raise AssertionError( "CMP Failed: Missing entries in index: %s, missing in tree: %s" % (bset-iset, iset-bset) )
         # END assertion message
@@ -120,7 +120,7 @@ class TestIndex(TestBase):
         
         # merge three trees - here we have a merge conflict
         three_way_index = IndexFile.from_tree(rw_repo, common_ancestor_sha, cur_sha, other_sha)
-        assert len(list(e for e in three_way_index.entries.values() if e.stage != 0))
+        assert len(list(e for e in list(three_way_index.entries.values()) if e.stage != 0))
         
         
         # ITERATE BLOBS
@@ -144,7 +144,7 @@ class TestIndex(TestBase):
         assert unmerged_blob_map
         
         # pick the first blob at the first stage we find and use it as resolved version
-        three_way_index.resolve_blobs( l[0][1] for l in unmerged_blob_map.itervalues() )
+        three_way_index.resolve_blobs( l[0][1] for l in unmerged_blob_map.values() )
         tree = three_way_index.write_tree()
         assert isinstance(tree, Tree)
         num_blobs = 0
@@ -211,7 +211,7 @@ class TestIndex(TestBase):
         # now make a proper three way merge with unmerged entries
         unmerged_tree = IndexFile.from_tree(rw_repo, parent_commit, tree, next_commit)
         unmerged_blobs = unmerged_tree.unmerged_blobs()
-        assert len(unmerged_blobs) == 1 and unmerged_blobs.keys()[0] == manifest_key[0]
+        assert len(unmerged_blobs) == 1 and list(unmerged_blobs.keys())[0] == manifest_key[0]
         
     
     @with_rw_repo('0.1.6')
@@ -318,9 +318,9 @@ class TestIndex(TestBase):
         fp.close()
         try:
             index.checkout(test_file)
-        except CheckoutError, e:
+        except CheckoutError as e:
             assert len(e.failed_files) == 1 and e.failed_files[0] == os.path.basename(test_file)
-            assert (len(e.failed_files) == len(e.failed_reasons)) and isinstance(e.failed_reasons[0], basestring)
+            assert (len(e.failed_files) == len(e.failed_reasons)) and isinstance(e.failed_reasons[0], str)
             assert len(e.valid_files) == 0
             assert open(test_file).read().endswith(append_data)
         else:
@@ -362,7 +362,7 @@ class TestIndex(TestBase):
         # IndexEntries
         def mixed_iterator():
             count = 0
-            for entry in index.entries.itervalues():
+            for entry in index.entries.values():
                 type_id = count % 4 
                 if type_id == 0:    # path
                     yield entry.path
@@ -457,7 +457,7 @@ class TestIndex(TestBase):
         # same file 
         entries = index.reset(new_commit).add([os.path.abspath(os.path.join('lib', 'git', 'head.py'))]*2, fprogress=self._fprogress_add)
         self._assert_entries(entries)
-        assert entries[0].mode & 0644 == 0644
+        assert entries[0].mode & 0o644 == 0o644
         # would fail, test is too primitive to handle this case
         # self._assert_fprogress(entries)
         self._reset_progress()
@@ -481,7 +481,7 @@ class TestIndex(TestBase):
         # add new file
         new_file_relapath = "my_new_file"
         new_file_path = self._make_file(new_file_relapath, "hello world", rw_repo)
-        entries = index.reset(new_commit).add([BaseIndexEntry((010644, null_bin_sha, 0, new_file_relapath))], fprogress=self._fprogress_add)
+        entries = index.reset(new_commit).add([BaseIndexEntry((0o10644, null_bin_sha, 0, new_file_relapath))], fprogress=self._fprogress_add)
         self._assert_entries(entries)
         self._assert_fprogress(entries)
         assert len(entries) == 1 and entries[0].hexsha != null_hex_sha
@@ -506,7 +506,7 @@ class TestIndex(TestBase):
         fake_symlink_relapath = "my_fake_symlink"
         link_target = "/etc/that"
         fake_symlink_path = self._make_file(fake_symlink_relapath, link_target, rw_repo)
-        fake_entry = BaseIndexEntry((0120000, null_bin_sha, 0, fake_symlink_relapath))
+        fake_entry = BaseIndexEntry((0o120000, null_bin_sha, 0, fake_symlink_relapath))
         entries = index.reset(new_commit).add([fake_entry], fprogress=self._fprogress_add)
         self._assert_entries(entries)
         self._assert_fprogress(entries)
@@ -514,7 +514,7 @@ class TestIndex(TestBase):
         assert len(entries) == 1 and S_ISLNK(entries[0].mode)
         
         # assure this also works with an alternate method
-        full_index_entry = IndexEntry.from_base(BaseIndexEntry((0120000, entries[0].binsha, 0, entries[0].path)))
+        full_index_entry = IndexEntry.from_base(BaseIndexEntry((0o120000, entries[0].binsha, 0, entries[0].path)))
         entry_key = index.entry_key(full_index_entry)
         index.reset(new_commit)
         
@@ -592,7 +592,7 @@ class TestIndex(TestBase):
             for fid in range(3):
                 fname = 'newfile%i' % fid
                 open(fname, 'wb').write("abcd")
-                yield Blob(rw_repo, Blob.NULL_BIN_SHA, 0100644, fname)
+                yield Blob(rw_repo, Blob.NULL_BIN_SHA, 0o100644, fname)
             # END for each new file
         # END path producer
         paths = list(make_paths())

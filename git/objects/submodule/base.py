@@ -1,5 +1,5 @@
-import util
-from util import (
+from . import util
+from .util import (
                     mkhead,
                     sm_name, 
                     sm_section, 
@@ -8,7 +8,7 @@ from util import (
                     find_first_remote_branch
                 )
 from git.objects.util import Traversable
-from StringIO import StringIO                   # need a dict to set bloody .name field
+from io import StringIO                   # need a dict to set bloody .name field
 from git.util import (
                         Iterable, 
                         join_path_native, 
@@ -89,7 +89,7 @@ class Submodule(util.IndexObject, Iterable, Traversable):
         if url is not None:
             self._url = url
         if branch_path is not None:
-            assert isinstance(branch_path, basestring)
+            assert isinstance(branch_path, str)
             self._branch_path = branch_path
         if name is not None:
             self._name = name
@@ -404,7 +404,7 @@ class Submodule(util.IndexObject, Iterable, Traversable):
                     mrepo.head.set_reference(local_branch, logmsg="submodule: attaching head to %s" % local_branch)
                     mrepo.head.ref.set_tracking_branch(remote_branch)
                 except IndexError:
-                    print >> sys.stderr, "Warning: Failed to checkout tracking branch %s" % self.branch_path 
+                    print("Warning: Failed to checkout tracking branch %s" % self.branch_path, file=sys.stderr) 
                 #END handle tracking branch
                 
                 # NOTE: Have to write the repo config file as well, otherwise
@@ -434,10 +434,10 @@ class Submodule(util.IndexObject, Iterable, Traversable):
                     binsha = rcommit.binsha
                     hexsha = rcommit.hexsha
                 else:
-                    print >> sys.stderr, "%s a tracking branch was not set for local branch '%s'" % (msg_base, mrepo.head.ref) 
+                    print("%s a tracking branch was not set for local branch '%s'" % (msg_base, mrepo.head.ref), file=sys.stderr) 
                 # END handle remote ref
             else:
-                print >> sys.stderr, "%s there was no local tracking branch" % msg_base
+                print("%s there was no local tracking branch" % msg_base, file=sys.stderr)
             # END handle detached head
         # END handle to_latest_revision option
         

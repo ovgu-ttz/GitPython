@@ -45,16 +45,16 @@ def get_object_type_by_name(object_type_name):
         
     :raise ValueError: In case object_type_name is unknown"""
     if object_type_name == "commit":
-        import commit
+        from . import commit
         return commit.Commit
     elif object_type_name == "tag":
-        import tag
+        from . import tag
         return tag.TagObject
     elif object_type_name == "blob":
-        import blob
+        from . import blob
         return blob.Blob
     elif object_type_name == "tree":
-        import tree
+        from . import tree
         return tree.Tree
     else:
         raise ValueError("Cannot handle unknown object type: %s" % object_type_name)

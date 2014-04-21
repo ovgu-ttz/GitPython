@@ -10,7 +10,7 @@ from git import Repo, Remote, GitCommandError
 from unittest import TestCase
 import tempfile
 import shutil
-import cStringIO
+import io
 
 GIT_REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
@@ -40,8 +40,8 @@ class StringProcessAdapter(object):
     Its tailored to work with the test system only"""
     
     def __init__(self, input_string):
-        self.stdout = cStringIO.StringIO(input_string)
-        self.stderr = cStringIO.StringIO()
+        self.stdout = io.StringIO(input_string)
+        self.stderr = io.StringIO()
         
     def wait(self):
         return 0
@@ -67,7 +67,7 @@ def _rmtree_onerror(osremove, fullpath, exec_info):
     if os.name != 'nt' or osremove is not os.remove:
         raise
         
-    os.chmod(fullpath, 0777)
+    os.chmod(fullpath, 0o777)
     os.remove(fullpath)
 
 def with_rw_repo(working_tree_ref, bare=False):
@@ -80,7 +80,7 @@ def with_rw_repo(working_tree_ref, bare=False):
     To make working with relative paths easier, the cwd will be set to the working 
     dir of the repository.
     """
-    assert isinstance(working_tree_ref, basestring), "Decorator requires ref name for working tree checkout"
+    assert isinstance(working_tree_ref, str), "Decorator requires ref name for working tree checkout"
     def argument_passer(func):
         def repo_creator(self):
             prefix = 'non_'
@@ -101,7 +101,7 @@ def with_rw_repo(working_tree_ref, bare=False):
                 try:
                     return func(self, rw_repo)
                 except:
-                    print >> sys.stderr, "Keeping repo after failure: %s" % repo_dir
+                    print("Keeping repo after failure: %s" % repo_dir, file=sys.stderr)
                     repo_dir = None
                     raise
             finally:
@@ -140,7 +140,7 @@ def with_rw_and_rw_remote_repo(working_tree_ref):
     
     See working dir info in with_rw_repo
     """
-    assert isinstance(working_tree_ref, basestring), "Decorator requires ref name for working tree checkout"
+    assert isinstance(working_tree_ref, str), "Decorator requires ref name for working tree checkout"
     def argument_passer(func):
         def remote_repo_creator(self):
             remote_repo_dir = _mktemp("remote_repo_%s" % func.__name__)
@@ -177,8 +177,8 @@ def with_rw_and_rw_remote_repo(working_tree_ref):
             # try to list remotes to diagnoes whether the server is up
             try:
                 rw_repo.git.ls_remote(d_remote)
-            except GitCommandError,e:
-                print str(e)
+            except GitCommandError as e:
+                print(str(e))
                 if os.name == 'nt':
                     raise AssertionError('git-daemon needs to run this test, but windows does not have one. Otherwise, run: git-daemon "%s"' % os.path.dirname(_mktemp())) 
                 else:

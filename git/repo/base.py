@@ -29,7 +29,7 @@ from gitdb.util import (
                             hex_to_bin
                         )
 
-from fun import (
+from .fun import (
                     rev_parse,
                     is_git_dir,
                     touch
@@ -532,8 +532,8 @@ class Repo(object):
             if not line.startswith("# Untracked files:"):
                 continue
             # skip two lines
-            stream.next()
-            stream.next()
+            next(stream)
+            next(stream)
             
             for untracked_info in stream:
                 if not untracked_info.startswith("#\t"):
@@ -652,7 +652,7 @@ class Repo(object):
         :return: ``git.Repo`` (the newly created repo)"""
 
         if mkdir and path and not os.path.exists(path):
-            os.makedirs(path, 0755)
+            os.makedirs(path, 0o755)
 
         # git command automatically chdir into the directory
         git = Git(path)
